@@ -1,5 +1,5 @@
 
-name := "spark"
+name := "spark-ggggg"
 version := "0.1"
 scalaVersion := "2.12.15"
 

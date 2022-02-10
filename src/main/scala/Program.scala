@@ -4,9 +4,19 @@ import org.apache.spark.sql.SparkSession
 object Program {
 
   def main(aggs: Array[String]): Unit = {
+
+    /*val kafkaParams = Map[String, Object](
+      "bootstrap.servers" -> "10.0.6.4:9092,10.0.6.5:9092,10.0.6.6:9092",
+      "key.deserializer" -> classOf[StringDeserializer],
+      "value.deserializer" -> classOf[StringDeserializer],
+      "group.id" -> "test2",
+      "auto.offset.reset" -> "latest",
+      "enable.auto.commit" -> (false: java.lang.Boolean)
+    )*/
+
     val spark: SparkSession = SparkSession.builder()
       .master("local[2]")
-      .appName("spark clickhous")
+      .appName("spark-ggggg")
       .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
       .config("park.ui.port", "9000")
       .getOrCreate()
@@ -14,18 +24,22 @@ object Program {
     spark.sparkContext.hadoopConfiguration.set("fs.s3a.secret.key", "XyyLqrhiABeTO2dAO/gDGAoa7qRuYhKcJriJZVKA/c4=")
     spark.sparkContext.hadoopConfiguration.set("fs.s3a.endpoint", "http://10.0.6.160:9000")
 
-    val data = Seq(("James", "39192", "Smith", "36636", "M", 3000),
-      ("Michael", "Rose", "39192", "40288", "M", 4000),
-      ("Robert", "39192", "Williams", "42114", "M", 4000),
-      ("Maria", "Anne", "Jones", "39192", "F", 4000),
-      ("Jen", "Mary", "Brown", "39192", "F", -1)
-    )
+    val df = spark
+      .read
+      .format("kafka")
+      .option("kafka.bootstrap.servers", "10.0.6.4:9092,10.0.6.5:9092,10.0.6.6:9092")
+      .option("subscribe", "test1")
+      .load()
 
-    val columns = Seq("firstname", "middlename", "lastname", "dob", "gender", "salary")
-    import spark.sqlContext.implicits._
-    val df = data.toDF(columns: _*)
-    df.show(3)
+    df.write
+      .format("parquet")
+      .parquet("s3a://test/parquet/2022/02/10")
 
-    df.write.parquet("s3a://test/parquet/people.parquet")
+    /*val parquetFileDF = spark.read.parquet("s3a://test/parquet/2022/02/10")
+    val df = parquetFileDF.withColumn("key_str", parquetFileDF.col("key").cast("String").alias("key_str"))
+      .drop("key").withColumn("value_str", parquetFileDF.col("value").cast("String").alias("value_str"))
+      .drop("value").withColumnRenamed("key_str", "key").withColumnRenamed("value_str", "value")
+    df.show()*/
+
   }
 }
