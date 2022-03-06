@@ -28,17 +28,25 @@ object Program {
       .format("kafka")
       .option("kafka.bootstrap.servers", "10.0.7.84:9092,10.0.7.86:9092,10.0.7.88:9092")
       .option("subscribe", "metadata")
-//      .option("kafka.group.id", "spark")
+      .option("kafka.group.id", "spark")
+      .option("startingOffsets", "latest")
       .load()
 
-    val writing = df.writeStream
-      .format("console")
-      .option("truncate", value = false)
-      .trigger(Trigger.ProcessingTime(10.seconds))
+    val parquetQuery = df
+      .coalesce(1)
+      .withColumn("key_str", df.col("key").cast("String").alias("key_str"))
+      .drop("key").withColumn("value_str", df.col("value").cast("String").alias("value_str"))
+      .drop("value").withColumnRenamed("key_str", "key")
+      .withColumnRenamed("value_str", "value")
+      .writeStream
+      .format("parquet")
+      .option("path", "s3a://test/parquet/2022/02/11")
+      .trigger(Trigger.ProcessingTime(1.minutes))
+      .option("checkpointLocation", "s3a://test/parquet/2022/02/11/checkpoint")
       .outputMode(OutputMode.Append())
       .start()
 
-    writing.awaitTermination()
+    parquetQuery.awaitTermination()
   }
 
   def flattenSchema(schema: StructType, prefix: String = null) : Array[Column] = {
@@ -89,16 +97,3 @@ DF.write
     .format("parquet")
     .parquet("s3a://test/parquet/2022/02/11")*/
 
-/*val parquetQuery = df
-  .coalesce(1)
-  .withColumn("key_str", df.col("key").cast("String").alias("key_str"))
-  .drop("key").withColumn("value_str", df.col("value").cast("String").alias("value_str"))
-  .drop("value").withColumnRenamed("key_str", "key")
-  .withColumnRenamed("value_str", "value")
-  .writeStream
-  .format("parquet")
-  .option("path", "s3a://test/parquet/2022/02/11")
-  .trigger(Trigger.ProcessingTime(1.minutes))
-  .option("checkpointLocation", "s3a://test/parquet/2022/02/11/checkpoint")
-  .outputMode(OutputMode.Append())
-  .start()*/
