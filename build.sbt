@@ -1,5 +1,5 @@
 
-name := "spark-ggggg"
+name := "spark"
 version := "0.1"
 scalaVersion := "2.12.15"
 
@@ -13,10 +13,10 @@ libraryDependencies += "org.apache.spark" %% "spark-streaming" % "3.2.1"
 libraryDependencies += "org.apache.spark" %% "spark-streaming-kafka-0-10" % "3.2.1"
 
 libraryDependencies += "org.apache.hadoop" % "hadoop-aws" % "3.3.1"
-libraryDependencies += "org.apache.hadoop" % "hadoop-common" % "3.3.1"
-libraryDependencies += "org.apache.hadoop" % "hadoop-client" % "3.3.1"
-libraryDependencies += "org.apache.hadoop" % "hadoop-client-api" % "3.3.1"
-libraryDependencies += "com.amazonaws" % "aws-java-sdk" % "1.12.150"
+//libraryDependencies += "org.apache.hadoop" % "hadoop-common" % "3.3.1"
+//libraryDependencies += "org.apache.hadoop" % "hadoop-client" % "3.3.1"
+//libraryDependencies += "org.apache.hadoop" % "hadoop-client-api" % "3.3.1"
+libraryDependencies += "com.amazonaws" % "aws-java-sdk" % "1.12.154"
 
 assemblyMergeStrategy in assembly := {
   case "reference.conf" => MergeStrategy.concat
